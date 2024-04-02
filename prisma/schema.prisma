@@ -1,0 +1,70 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["metrics"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model categories {
+  id               String             @id @db.VarChar(100)
+  name             String             @db.VarChar(100)
+  category_product category_product[]
+}
+
+model category_product {
+  category_id  String       @db.VarChar(100)
+  product_id   String       @db.VarChar(100)
+  categories   categories   @relation(fields: [category_id], references: [id])
+  products_rep products_rep @relation(fields: [product_id], references: [id])
+
+  @@id([category_id, product_id])
+  @@index([product_id], map: "category_product_product_id_fkey")
+}
+
+model comments {
+  id      String @id @unique
+  title   String @db.VarChar(255)
+  content String @db.LongText
+  user_id String @unique
+  users   users  @relation(fields: [user_id], references: [id])
+}
+
+model customers {
+  id    Int    @id @default(autoincrement())
+  name  String @db.VarChar(100)
+  email String @unique @db.VarChar(50)
+  phone String @unique @db.VarChar(12)
+}
+
+model ewallet {
+  id      String @unique
+  balance Int    @default(0)
+  user_id String @unique
+  users   users  @relation(fields: [user_id], references: [id], map: "ewallet_userId_fk")
+}
+
+model products {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(100)
+  price    Int    @default(0)
+  stock    Int    @default(0)
+  category String @db.VarChar(100)
+}
+
+model products_rep {
+  id               String             @id @db.VarChar(100)
+  name             String             @db.VarChar(100)
+  price            Int                @default(0)
+  stock            Int                @default(0)
+  category_product category_product[]
+}
+
+model users {
+  id       String    @id
+  name     String
+  comments comments?
+  ewallet  ewallet?
+}
